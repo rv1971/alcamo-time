@@ -1,5 +1,5 @@
 {
-    "name": "alcamo/rdfa",
+    "name": "alcamo/time",
     "description": "Date/time-related classes",
     "keywords": [ "time", "date", "duration" ],
     "license": "Apache-2.0",
