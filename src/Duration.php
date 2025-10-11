@@ -17,7 +17,12 @@ use alcamo\exception\SyntaxError;
  */
 class Duration extends \DateInterval
 {
-    /// Average number of days in a month
+    /**
+     * @brief Average number of days in a month
+     *
+     * May be changed in derived classes if a different computation is needed
+     * (e.g. for commercial applications).
+     */
     public const AVG_DAYS_PER_MONTH = 365.2425 / 12;
 
     /**
@@ -142,7 +147,8 @@ class Duration extends \DateInterval
     {
         return $this->days > 0
             ? $this->days
-            : ($this->y * 12 + $this->m) * self::AVG_DAYS_PER_MONTH + $this->d;
+            : ($this->y * 12 + $this->m) * static::AVG_DAYS_PER_MONTH
+            + $this->d;
     }
 
     private function getTotalHoursAsFloat(): float
