@@ -15,7 +15,7 @@ echo $duration->getTotalSeconds() . "\n";
 This will output:
 
 ~~~
-P1DT2.55S
+P1DT2.5S
 1440
 86402.5
 ~~~
@@ -23,6 +23,6 @@ P1DT2.55S
 Unlike PHP's built-in `DateInterval::__construct()`,
  `Duration::__construct()` can handle fractions of seconds.
  
-Furthermore, methods are provided to et the total number of days,
+Furthermore, methods are provided to get the total number of days,
 hours, minutes and seconds.
 
