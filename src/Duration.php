@@ -12,9 +12,14 @@ use alcamo\exception\SyntaxError;
 
 /**
  * @brief %Duration adding features to DateInterval
+ *
+ * @date Last reviewed 2025-10-11
  */
 class Duration extends \DateInterval
 {
+    /// Average number of days in a month
+    public const AVG_DAYS_PER_MONTH = 365.2425 / 12;
+
     /**
      * Unlike
      * [DateInterval::__construct()](https://www.php.net/manual/en/dateinterval.construct)
@@ -51,7 +56,7 @@ class Duration extends \DateInterval
                 parent::__construct("{$a[0]}S");
             }
 
-            $this->f = (float)str_pad(rtrim($a[1], 'S'), 6, '0') / 1000000.;
+            $this->f = (float)".{$a[1]}";
         }
     }
 
@@ -86,14 +91,12 @@ class Duration extends \DateInterval
             $timeFormat .= '%iM';
         }
 
-        if ($this->s || $this->f >= .5e-6) {
-            $timeFormat .= '%s';
+        $fraction = rtrim($this->format('%F'), 0);
 
-            if ($this->f >= .5e-6) {
-                $timeFormat .= trim(sprintf('%f', $this->f), '0');
-            }
-
-            $timeFormat .= 'S';
+        if ($this->s || $fraction) {
+            $timeFormat .= "%s"
+                . ($fraction ? ".$fraction" : '')
+                . 'S';
         }
 
         if ($timeFormat != '') {
@@ -106,27 +109,49 @@ class Duration extends \DateInterval
     /// Return the total number of days, ignoring smaller units of time
     public function getTotalDays(): int
     {
-      /** If months are specified, consider them to be of 30 days. */
-        return $this->days > 0
-        ? $this->days
-        : $this->y * 365 + $this->m * 30 + $this->d;
+        /** @warning If the interval contains months, they are counted with
+         *  their average duration. */
+        return round($this->getTotalDaysAsFloat());
     }
 
     /// Return the total number of hours, ignoring smaller units of time
     public function getTotalHours(): int
     {
-        return $this->getTotalDays() * 24 + $this->h;
+        /** @warning If the interval contains months, they are counted with
+         *  their average duration up to hour precision. */
+        return round($this->getTotalHoursAsFloat());
     }
 
     /// Return the total number of minutes, ignoring smaller units of time
     public function getTotalMinutes(): int
     {
-        return $this->getTotalHours() * 60 + $this->i;
+        /** @warning If the interval contains months, they are counted with
+         *  their average duration up to minute precision. */
+        return round($this->getTotalMinutesAsFloat());
     }
 
     /// Return the total number of seconds, ignoring smaller units of time
     public function getTotalSeconds(): float
     {
-        return $this->getTotalMinutes() * 60 + $this->s + $this->f;
+        /** @warning If the interval contains months, they are counted with
+         *  their average duration. */
+        return $this->getTotalMinutesAsFloat() * 60 + $this->s + $this->f;
+    }
+
+    private function getTotalDaysAsFloat(): float
+    {
+        return $this->days > 0
+            ? $this->days
+            : ($this->y * 12 + $this->m) * self::AVG_DAYS_PER_MONTH + $this->d;
+    }
+
+    private function getTotalHoursAsFloat(): float
+    {
+        return $this->getTotalDaysAsFloat() * 24 + $this->h;
+    }
+
+    private function getTotalMinutesAsFloat(): float
+    {
+        return $this->getTotalHoursAsFloat() * 60 + $this->i;
     }
 }

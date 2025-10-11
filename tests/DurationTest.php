@@ -32,7 +32,7 @@ class DurationTest extends TestCase
         return [
             [
                 'P1Y2M3DT4H5M6.78912S', 'P1Y2M3DT4H5M6.78912S',
-                428, 10276, 616565, 36993906.78912
+                429, 10303, 618172, 37090350.78912
             ],
             [
                 'P100D', 'P100D',
@@ -61,6 +61,10 @@ class DurationTest extends TestCase
             [
                 'PT.1S', 'PT0.1S',
                 0, 0, 0, 0.1
+            ],
+            [
+                'PT.02S', 'PT0.02S',
+                0, 0, 0, 0.02
             ]
         ];
     }
