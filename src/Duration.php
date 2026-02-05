@@ -26,17 +26,29 @@ class Duration extends \DateInterval
     public const AVG_DAYS_PER_MONTH = 365.2425 / 12;
 
     /**
+     * @param stringable|DateInterval $text
+     *
      * Unlike
      * [DateInterval::__construct()](https://www.php.net/manual/en/dateinterval.construct)
      * this constructor also recognizes fractions of a second.
      */
-    public function __construct(string $string)
+    public function __construct($text)
     {
-        $a = explode('.', $string);
+        if ($text instanceof \DateInterval) {
+            $text = $text->format(
+                '%rP'
+                    . ($text->days > 0 ? '%aD' : '%yY%mM%dD')
+                    . 'T%hH%iM%s.%FS'
+            );
+        } else {
+            $text = (string)$text;
+        }
+
+        $a = explode('.', $text);
 
         if (!isset($a[1])) {
             // Literal without dot, understood by DateInterval constructor
-            parent::__construct($string);
+            parent::__construct($text);
         } else {
             // After the dot there must be a number and an 'S'.
             if (!preg_match('/^([0-9]*)S$/', $a[1], $matches)) {
@@ -44,7 +56,7 @@ class Duration extends \DateInterval
                  *  ISO 8601 duration */
                 throw (new SyntaxError())->setMessageContext(
                     [
-                        'inData' => $string,
+                        'inData' => $text,
                         'atOffset' => strlen($a[0]),
                         'extraMessage' => 'not a supported ISO 8601 duration'
                     ]

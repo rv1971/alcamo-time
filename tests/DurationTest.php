@@ -11,14 +11,14 @@ class DurationTest extends TestCase
    * @dataProvider basicsProvider
    */
     public function testBasics(
-        $string,
+        $text,
         $expectedString,
         $expectedTotalDays,
         $expectedTotalHours,
         $expectedTotalMinutes,
         $expectedTotalSeconds
     ) {
-        $duration = new Duration($string);
+        $duration = new Duration($text);
 
         $this->assertSame($expectedString, (string)$duration);
         $this->assertSame($expectedTotalDays, $duration->getTotalDays());
@@ -29,13 +29,16 @@ class DurationTest extends TestCase
 
     public function basicsProvider()
     {
+        $dateInterval = new \DateInterval('P1Y2M3DT4H5M6S');
+        $dateInterval->f = 0.78912;
+
         return [
             [
-                'P1Y2M3DT4H5M6.78912S', 'P1Y2M3DT4H5M6.78912S',
+                $dateInterval, 'P1Y2M3DT4H5M6.78912S',
                 429, 10303, 618172, 37090350.78912
             ],
             [
-                'P100D', 'P100D',
+                new \DateInterval('P100D'), 'P100D',
                 100, 2400, 144000, 8640000.0
             ],
             [
