@@ -32,8 +32,14 @@ class Duration extends \DateInterval
      * [DateInterval::__construct()](https://www.php.net/manual/en/dateinterval.construct)
      * this constructor also recognizes fractions of a second.
      */
-    public function __construct($text)
+    public function __construct($text = null)
     {
+        /** If $text is unset, return a zero duration. */
+        if (!isset($text)) {
+            parent::__construct('P0D');
+            return;
+        }
+
         if ($text instanceof \DateInterval) {
             $text = $text->format(
                 '%rP'

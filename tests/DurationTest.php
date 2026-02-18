@@ -33,6 +33,7 @@ class DurationTest extends TestCase
         $dateInterval->f = 0.78912;
 
         return [
+            [ null, 'P', 0, 0, 0, 0.0 ],
             [
                 $dateInterval, 'P1Y2M3DT4H5M6.78912S',
                 429, 10303, 618172, 37090350.78912
