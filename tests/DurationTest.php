@@ -3,7 +3,7 @@
 namespace alcamo\time;
 
 use PHPUnit\Framework\TestCase;
-use alcamo\exception\{SyntaxError};
+use alcamo\exception\SyntaxError;
 
 class DurationTest extends TestCase
 {
