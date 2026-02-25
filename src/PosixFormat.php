@@ -119,7 +119,7 @@ class PosixFormat
         }
     }
 
-    public function getPosixFormat(): string
+    public function __toString(): string
     {
         return $this->posixFormat_;
     }

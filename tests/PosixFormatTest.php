@@ -20,15 +20,17 @@ class PosixFormatTest extends TestCase
     ): void {
         $dateTime = new \DateTime($dateTime);
 
-        $posixFormat = new PosixFormat($posixFormat);
+        $posixFormatObj = new PosixFormat($posixFormat);
 
-        $this->assertSame($expectedPhpFormat, $posixFormat->getPhpFormat());
+        $this->assertSame($posixFormat, (string)$posixFormatObj);
 
-        $this->assertSame($expectedText, $posixFormat->getText());
+        $this->assertSame($expectedPhpFormat, $posixFormatObj->getPhpFormat());
 
-        $this->assertSame($expectedLength, $posixFormat->getLength());
+        $this->assertSame($expectedText, $posixFormatObj->getText());
 
-        $this->assertSame($expectedResult, $posixFormat->applyTo($dateTime));
+        $this->assertSame($expectedLength, $posixFormatObj->getLength());
+
+        $this->assertSame($expectedResult, $posixFormatObj->applyTo($dateTime));
     }
 
     public function basicsProvider(): array
