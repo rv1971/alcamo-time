@@ -70,7 +70,7 @@ class PosixFormat
     ];
 
     private static $posixSpecToPhpSpec_;
-    private static $posixSpecToText_;
+    private static $posixSpecToText_ = [ '%%' => '%' ];
 
     private $posixFormat_; ///< string
     private $phpFormat_;   ///< string
@@ -81,7 +81,6 @@ class PosixFormat
     {
         if (!isset(self::$posixSpecToPhpSpec_)) {
             self::$posixSpecToPhpSpec_ = [];
-            self::$posixSpecToText_ = [];
 
             foreach (self::POSIX_FORMAT_SPECS_MAP as $posixSpec => $data) {
                 [
@@ -89,29 +88,44 @@ class PosixFormat
                     self::$posixSpecToText_[$posixSpec]
                 ] = $data;
             }
-
-            self::$posixSpecToText_['%%'] = '%';
         }
 
         $this->posixFormat_ = $posixFormat;
 
-        $phpFormat = strtr($posixFormat, self::$posixSpecToPhpSpec_);
+        $phpFormat = strtr(
+            /* Escape all characters which are not part of a format
+             * specifier:
+             * 1. escape all alphabetic characters
+             * 2. replace all double %% by \x01
+             * 3. replace %\ to % to not escape characters which are format
+             *    specifiers; step 2 ensures that letters after double %%
+             *    remain escaped
+             * 4. replace \x01 by %% again (some lines later below).
+             */
+            strtr(
+                preg_replace('/([A-Z])/', '\\\\$1', $posixFormat),
+                [
+                    '%%' => "\x01",
+                    '%\\' => '%'
+                ]
+            ),
+            self::$posixSpecToPhpSpec_
+        );
 
-        $unsupportedPos = strpos(strtr($phpFormat, [ '%%' => '' ]), '%');
-
-        if ($unsupportedPos !== false) {
+        if (strpos($phpFormat, '%') !== false) {
             /** @throw alcamo::exception::Unsupported if the format contains
              *  an unsupported format specifier. */
             throw (new Unsupported())->setMessageContext(
                 [
                     'feature' =>
                         'Posix format specifier %'
-                        . $phpFormat[$unsupportedPos + 1]
+                        . $phpFormat[strpos($phpFormat, '%') + 1]
                 ]
             );
         }
 
-        $this->phpFormat_ = strtr($phpFormat, [ '%%' => '%' ]);
+        $this->phpFormat_ = strtr($phpFormat, [ "\x01" => '%' ]);
+
         $this->text_ = strtr($posixFormat, self::$posixSpecToText_);
 
         if (strpos($this->text_, '*') === false) {

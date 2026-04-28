@@ -51,6 +51,14 @@ class PosixFormatTest extends TestCase
                 '* VV, u w',
                 null,
                 'January 52, 7 0'
+            ],
+            [
+                '2026-04-28T22:06:13',
+                '%Y-%m-%dT%H:%M:%SAB%%C',
+                'Y-m-d\TH:i:s\A\B%\C',
+                'YYYY-mm-ddTHH:MM:SSAB%C',
+                23,
+                '2026-04-28T22:06:13AB%C'
             ]
         ];
     }
