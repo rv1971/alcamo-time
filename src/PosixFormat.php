@@ -84,7 +84,11 @@ class PosixFormat
 
             foreach (self::POSIX_FORMAT_SPECS_MAP as $posixSpec => $data) {
                 [
-                    self::$posixSpecToPhpSpec_[$posixSpec],
+                    /* Insert a backslash into each POSIX format specifier,
+                     * exploiting the fact that each POSIX format specifier is
+                     * made of two characters and the first character is a
+                     * %. */
+                    self::$posixSpecToPhpSpec_["%\\{$posixSpec[1]}"],
                     self::$posixSpecToText_[$posixSpec]
                 ] = $data;
             }
@@ -95,36 +99,30 @@ class PosixFormat
         $phpFormat = strtr(
             /* Escape all characters which are not part of a format
              * specifier:
-             * 1. escape all alphabetic characters
-             * 2. replace all double %% by \x01
-             * 3. replace %\ to % to not escape characters which are format
-             *    specifiers; step 2 ensures that letters after double %%
-             *    remain escaped
-             * 4. replace \x01 by %% again (some lines later below).
+             * 1. Escape all alphabetic characters.
+             * 2. Replace POSIX format specs, exploiting the fact that the
+             *    keys of self::$posixSpecToPhpSpec_ already contain the escape
+             *    character.
              */
-            strtr(
-                preg_replace('/([A-Z])/', '\\\\$1', $posixFormat),
-                [
-                    '%%' => "\x01",
-                    '%\\' => '%'
-                ]
-            ),
+            preg_replace('/([A-Za-z])/', '\\\\$1', $posixFormat),
             self::$posixSpecToPhpSpec_
         );
 
-        if (strpos($phpFormat, '%') !== false) {
+        $unsupportedPos = strpos(strtr($phpFormat, [ '%%' => '.' ]), '%');
+
+        if ($unsupportedPos !== false) {
             /** @throw alcamo::exception::Unsupported if the format contains
              *  an unsupported format specifier. */
             throw (new Unsupported())->setMessageContext(
                 [
                     'feature' =>
                         'Posix format specifier %'
-                        . $phpFormat[strpos($phpFormat, '%') + 1]
+                        . $phpFormat[$unsupportedPos + 2]
                 ]
             );
         }
 
-        $this->phpFormat_ = strtr($phpFormat, [ "\x01" => '%' ]);
+        $this->phpFormat_ = strtr($phpFormat, [ '%%' => '%' ]);
 
         $this->text_ = strtr($posixFormat, self::$posixSpecToText_);
 
