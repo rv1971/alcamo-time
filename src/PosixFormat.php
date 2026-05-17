@@ -10,6 +10,8 @@ use alcamo\exception\Unsupported;
  * Provides an equivalent PHP format, if possible, as well as a human-readable
  * representation and the length of the result, if fixed.
  *
+ * @invariant Immutable class.
+ *
  * @date Last reviewed 2026-02-25
  */
 class PosixFormat
